@@ -4,7 +4,12 @@ defmodule FraudNetworkTest do
 
   test "error when inital user fraud" do
     network = [{0,1}, {0,2}]
-    assert FraudNetwork.get_fraud_score(0, network, [0], 1) == {:error, 0}
+    assert FraudNetwork.get_fraud_score(0, network, [0], 1) == {:error, -1}
+  end
+
+  test "error when initial user not in network" do
+    network = [{0,1}, {0,2}]
+    assert FraudNetwork.get_fraud_score(3, network, [0], 1) == {:error, -1}
   end
 
   test "Fraudulency at first depth with 2 links on level" do
