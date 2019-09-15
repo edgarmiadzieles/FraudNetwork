@@ -5,7 +5,7 @@ defmodule FraudNetwork do
 
   def get_fraud_score(user, links, fraudulent_users, max_depth) do
     if Enum.member?(fraudulent_users, user) do
-      {:error, -1}
+      {:error, 0}
     else
       matrix = Matrix.create_matrix_from_links(links, %{})
       score = get_score_recurisive([user], matrix, fraudulent_users, max_depth, [user], 0, 0)
