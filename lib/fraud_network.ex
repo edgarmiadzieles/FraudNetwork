@@ -4,19 +4,29 @@ defmodule FraudNetwork do
   """
 
   def get_fraud_score(user, links, fraudulent_users, max_depth) do
+    if Enum.member?(fraudulent_users, user) do
+      {:error, -1}
+    else
       matrix = Matrix.create_matrix_from_links(links, %{})
-      get_score_rec([user], matrix, fraudulent_users, max_depth, 1)
-      #found_links = get_depth_unvisited_links([1,2,7], [], matrix, [])
-      #get_depth_score(found_links, fraudulent_users, depth, 0)
+      score = get_score_rec([user], matrix, fraudulent_users, max_depth, [user], 0, 0)
+      {:ok, score}
+    end
   end
 
-  def get_score_rec(users, matrix, fraudulent_users, max_depth, depth) do
-    found_links = get_depth_unvisited_links(users, [], matrix, [])
-    depth_score = get_depth_score(found_links, fraudulent_users, depth, 0)
-  end
-
-  def get_score_rec(_, matrix, fraudulent_users, visited, depth, depth, score) do
+  def get_score_rec(_, _, _, max_depth, _, max_depth, score) do
     score
+  end
+
+  def get_score_rec([], _, _, _, _, _, score) do
+    score
+  end
+
+  def get_score_rec(users, matrix, fraudulent_users, max_depth, visited, depth, score) do
+    current_depth = depth + 1
+    found_links = get_depth_unvisited_links(users, visited, matrix, [])
+    found_links_flatten = List.flatten(found_links)
+    depth_score = get_depth_score(found_links, fraudulent_users, current_depth, 0)
+    get_score_rec(found_links_flatten, matrix, fraudulent_users, max_depth, found_links_flatten ++ visited, current_depth, score + depth_score)
   end
 
   def get_depth_score([], fraudulent_users, depth, score) do
@@ -32,10 +42,6 @@ defmodule FraudNetwork do
   def get_depth_unvisited_links([depth_user|tail], visited, matrix, found_links) do
     found_links_for_user = get_unvisited_links(matrix[depth_user], visited, [])
     get_depth_unvisited_links(tail, found_links_for_user ++ visited, matrix, found_links ++ [found_links_for_user])
-    #{visited_all, found_links} = get_unvisited_links(user_links, visited, [])
-    #fraudulent_count = get_fraudulent_count(found_links, fraudulent_users, 0)
-    #depth_score = (Enum.count(found_links) * fraudulent_count) / depth
-    #{visited_all, found_links}
   end
 
   def get_depth_unvisited_links([], _, _, found_links) do
