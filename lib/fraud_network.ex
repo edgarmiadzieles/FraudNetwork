@@ -8,28 +8,28 @@ defmodule FraudNetwork do
       {:error, -1}
     else
       matrix = Matrix.create_matrix_from_links(links, %{})
-      score = get_score_rec([user], matrix, fraudulent_users, max_depth, [user], 0, 0)
+      score = get_score_recurisive([user], matrix, fraudulent_users, max_depth, [user], 0, 0)
       {:ok, score}
     end
   end
 
-  def get_score_rec(_, _, _, max_depth, _, max_depth, score) do
+  def get_score_recurisive(_, _, _, max_depth, _, max_depth, score) do
     score
   end
 
-  def get_score_rec([], _, _, _, _, _, score) do
+  def get_score_recurisive([], _, _, _, _, _, score) do
     score
   end
 
-  def get_score_rec(users, matrix, fraudulent_users, max_depth, visited, depth, score) do
+  def get_score_recurisive(users, matrix, fraudulent_users, max_depth, visited, depth, score) do
     current_depth = depth + 1
     found_links = get_depth_unvisited_links(users, visited, matrix, [])
     found_links_flatten = List.flatten(found_links)
     depth_score = get_depth_score(found_links, fraudulent_users, current_depth, 0)
-    get_score_rec(found_links_flatten, matrix, fraudulent_users, max_depth, found_links_flatten ++ visited, current_depth, score + depth_score)
+    get_score_recurisive(found_links_flatten, matrix, fraudulent_users, max_depth, found_links_flatten ++ visited, current_depth, score + depth_score)
   end
 
-  def get_depth_score([], fraudulent_users, depth, score) do
+  def get_depth_score([], _, _, score) do
     score
   end
 
